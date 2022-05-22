@@ -13,6 +13,17 @@
 
 #include "roboclaw.h"
 
+inline bool isNearZero(double val)
+{
+  if (val >= -std::numeric_limits<double>::epsilon() && 
+    val <= std::numeric_limits<double>::epsilon())
+  {
+    return true;
+  }
+
+  return false;
+}
+
 MotorDriver::MotorDriver()
     : Node("motor_driver_node"),
       device_name_("foo_bar"),
@@ -50,7 +61,8 @@ void MotorDriver::cmdVelCallback(
   double yaw_velocity =
       std::min(std::max((float)msg->angular.z, -max_angular_velocity_),
                max_angular_velocity_);
-  if ((msg->linear.x == 0) && (msg->angular.z == 0)) {
+  if (isNearZero(msg->linear.x) && 
+      isNearZero(msg->angular.z)) {
     roboclaw_->doMixedSpeedDist(0, 0, 0, 0);
   } else if ((fabs(x_velocity) > 0.01) || (fabs(yaw_velocity) > 0.01)) {
     const double m1_desired_velocity =
